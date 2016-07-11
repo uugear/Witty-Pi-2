@@ -28,6 +28,9 @@ gpio -g mode $halt_pin in
 # LED on GPIO-17 (BCM naming)
 led_pin=17
 
+# wait for RTC ready
+sleep 2
+
 # if RTC presents
 has_rtc=is_rtc_connected
 
@@ -52,12 +55,15 @@ fi
 # synchronize time
 "$cur_dir/syncTime.sh" &
 
+# wait for system time update
+sleep 2
+
 # run schedule script
 "$cur_dir/runScript.sh" >> /home/pi/wittyPi/schedule.log &
 
 # delay until GPIO pin state gets stable
 counter=0
-while [ $counter -lt 10 ]; do  # increase this value if it needs more time
+while [ $counter -lt 5 ]; do  # increase this value if it needs more time
   if [ $(gpio -g read $halt_pin) == '1' ] ; then
     counter=$(($counter+1))
   else
