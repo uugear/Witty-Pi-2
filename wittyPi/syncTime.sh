@@ -30,23 +30,23 @@ if $(is_rtc_connected) ; then
 
   # get RTC time
   rtctime="$(get_rtc_time)"
+  
+  # if RTC time is OK, write RTC time to system first
+  if [[ $rtctime != *"1999"* ]] && [[ $rtctime != *"2000"* ]]; then
+    rtc_to_system
+  fi
+
+  # wait a moment for Internet connection
+  sleep 10
 
   if $(has_internet) ; then
-    if [[ $rtctime != *"1999"* ]] && [[ $rtctime != *"2000"* ]]; then
-      # if RTC time is OK, write RTC time to system first
-      rtc_to_system
-    fi
     # now take new time from NTP
     log 'Internet detected, apply NTP time to system and Witty Pi...'
     force_ntp_update
     system_to_rtc
   else
-    # get RTC time
-    rtctime="$(get_rtc_time)"
-
     # get system year
     sysyear="$(date +%Y)"
-
     if [[ $rtctime == *"1999"* ]] || [[ $rtctime == *"2000"* ]]; then
       # if you never set RTC time before
       log 'RTC time has not been set before (stays in year 1999/2000).'
@@ -56,10 +56,6 @@ if $(is_rtc_connected) ; then
       else
         log 'Neither system nor Witty Pi contains correct time.'
       fi
-    else
-      # RTC time seems OK, write RTC time to system
-      log 'RTC contains newer time.'
-      rtc_to_system
     fi
   fi
 else
