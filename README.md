@@ -8,4 +8,4 @@ After installing the software on your Raspberry Pi, you can enjoy these amazing 
 * You can schedule the startup/shutdown of your Raspberry Pi.
 * You can even write a script to define complex ON/OFF sequence.
 
-Witty Pi supports all Raspberry Pi models with 40-pin header, including A+, B+, 2B, Zero and 3B.
+Witty Pi 2 supports all Raspberry Pi models with 40-pin header, including A+, B+, 2B, Zero and 3B.
