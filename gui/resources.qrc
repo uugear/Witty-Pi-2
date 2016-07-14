@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/w2r.png</file>
+        <file>images/ntp2all.png</file>
+        <file>images/r2w.png</file>
+        <file>images/uugear.png</file>
+    </qresource>
+</RCC>

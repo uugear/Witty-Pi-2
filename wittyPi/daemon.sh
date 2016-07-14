@@ -42,7 +42,7 @@ if $has_rtc ; then
   
   # if woke up by alarm B (shutdown), turn it off immediately
   if [ $((($byte_F&0x1) == 0)) == '1' ] && [ $((($byte_F&0x2) != 0)) == '1' ] ; then
-    log 'I am unexpectedly woke up by shutdown alarm, must go back to sleep...'
+    log 'Seems I was unexpectedly woken up by shutdown alarm, must go back to sleep...'
     do_shutdown $halt_pin $led_pin
   fi
   
