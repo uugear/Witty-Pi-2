@@ -47,7 +47,7 @@ if $has_rtc ; then
   fi
   
   # clear alarm flags
-  clear_alarm_flags byte_F
+  clear_alarm_flags $byte_F
 else
   log 'Witty Pi is not connected, skipping I2C communications...'
 fi
