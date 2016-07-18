@@ -16,7 +16,7 @@ cur_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # utilities
 . "$cur_dir/utilities.sh"
 
-log 'Witty Pi 2 daemon (v2.5) is started.'
+log 'Witty Pi 2 daemon (v2.51) is started.'
 
 # halt by GPIO-4 (BCM naming)
 halt_pin=4
@@ -49,17 +49,25 @@ if $has_rtc ; then
   # clear alarm flags
   clear_alarm_flags $byte_F
 else
-  log 'Witty Pi is not connected, skipping I2C communications...'
+  log 'Witty Pi is not connected, skip I2C communications...'
 fi
 
 # synchronize time
-"$cur_dir/syncTime.sh" &
+if $has_rtc ; then
+  "$cur_dir/syncTime.sh" &
+else
+  log 'Witty Pi is not connected, skip synchronizing time...'
+fi
 
 # wait for system time update
-sleep 2
+sleep 3
 
 # run schedule script
-"$cur_dir/runScript.sh" >> /home/pi/wittyPi/schedule.log &
+if $has_rtc ; then
+  "$cur_dir/runScript.sh" >> "$cur_dir/schedule.log" &
+else
+  log 'Witty Pi is not connected, skip schedule script...'
+fi
 
 # delay until GPIO pin state gets stable
 counter=0
@@ -71,6 +79,9 @@ while [ $counter -lt 5 ]; do  # increase this value if it needs more time
   fi
   sleep 1
 done
+
+# run extra tasks in background
+"$cur_dir/extraTasks.sh" >> "$cur_dir/wittyPi.log" 2>&1 &
 
 # wait for GPIO-4 (BCM naming) falling, or alarm B (shutdown)
 log 'Pending for incoming shutdown command...'

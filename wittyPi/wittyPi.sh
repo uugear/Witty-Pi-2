@@ -15,7 +15,7 @@ echo '==========================================================================
 echo '|                                                                              |'
 echo '|   Witty Pi 2 - Realtime Clock + Power Management for Raspberry Pi            |'
 echo '|                                                                              |'
-echo '|                   < Version 2.5 >     by UUGear s.r.o.                       |'
+echo '|                   < Version 2.51 >     by UUGear s.r.o.                      |'
 echo '|                                                                              |'
 echo '================================================================================'
 

@@ -117,10 +117,12 @@ if [ $ERR -eq 0 ]; then
     chmod +x daemon.sh
     chmod +x syncTime.sh
     chmod +x runScript.sh
+    chmod +x extraTasks.sh
     sed -e "s#/home/pi/wittyPi#$DIR#g" init.sh >/etc/init.d/wittypi
     chmod +x /etc/init.d/wittypi
     update-rc.d wittypi defaults
     cd ..
+    chown -R pi:pi wittyPi
     sleep 2
     rm wittyPi.zip
   fi
