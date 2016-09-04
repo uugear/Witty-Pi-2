@@ -16,7 +16,7 @@ cur_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # utilities
 . "$cur_dir/utilities.sh"
 
-log 'Witty Pi 2 daemon (v2.51) is started.'
+log 'Witty Pi 2 daemon (v2.52) is started.'
 
 # halt by GPIO-4 (BCM naming)
 halt_pin=4
@@ -39,13 +39,13 @@ if $has_rtc ; then
   i2c_write 0x01 0x68 0x0E 0x07
 
   byte_F=$(i2c_read 0x01 0x68 0x0F)
-  
+
   # if woke up by alarm B (shutdown), turn it off immediately
   if [ $((($byte_F&0x1) == 0)) == '1' ] && [ $((($byte_F&0x2) != 0)) == '1' ] ; then
     log 'Seems I was unexpectedly woken up by shutdown alarm, must go back to sleep...'
     do_shutdown $halt_pin $led_pin
   fi
-  
+
   # clear alarm flags
   clear_alarm_flags $byte_F
 else
@@ -96,6 +96,9 @@ while true; do
     else
       break;
     fi
+  else
+    # power switch can still work without RTC
+    break;
   fi
 done
 log 'Shutdown command is received...'
