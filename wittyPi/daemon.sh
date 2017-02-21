@@ -55,16 +55,17 @@ fi
 # synchronize time
 if $has_rtc ; then
   "$cur_dir/syncTime.sh" &
+ 
+ # wait for system time update
+ sleep 3
 else
   log 'Witty Pi is not connected, skip synchronizing time...'
 fi
 
-# wait for system time update
-sleep 3
-
 # run schedule script
 if $has_rtc ; then
-  "$cur_dir/runScript.sh" >> "$cur_dir/schedule.log" &
+  #should not be launch in background to be sure the next schedule is setup
+  "$cur_dir/runScript.sh" >> "$cur_dir/schedule.log"
 else
   log 'Witty Pi is not connected, skip schedule script...'
 fi
