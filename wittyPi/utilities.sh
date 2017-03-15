@@ -190,17 +190,19 @@ get_local_date_time()
   local result=$(date -d "$datestr" +"%d %H:%M:%S" 2>/dev/null)
   IFS=' ' read -r date timestr <<< "$result"
   IFS=':' read -r hour minute second <<< "$timestr"
-  if [ $bk_date == '??' ]; then
-    date='??'
-  fi
-  if [ $bk_hour == '??' ]; then
-    hour='??'
-  fi
-  if [ $bk_min == '??' ]; then
-    minute='??'
-  fi
-  if [ $bk_sec == '??' ]; then
-    second='??'
+  if [ -z ${2+x} ] ; then
+    if [ $bk_date == '??' ]; then
+      date='??'
+    fi
+    if [ $bk_hour == '??' ]; then
+      hour='??'
+    fi
+    if [ $bk_min == '??' ]; then
+      minute='??'
+    fi
+    if [ $bk_sec == '??' ]; then
+      second='??'
+    fi
   fi
   echo "$date $hour:$minute:$second"
 }
@@ -477,4 +479,18 @@ do_shutdown()
 
   # halt everything and shutdown
   shutdown -h now
+}
+
+startup_scheduled_in_future()
+{
+  local startup_time=$(get_local_date_time "$(get_startup_time)" "nowildcard")
+  local st_size=${#startup_time}
+  if [ $st_size != '3' ] ; then
+    local st_timestamp=$(date --date="$(date +%Y-%m-)$startup_time" +%s)
+    local cur_timestamp=$(date +%s)
+    if [ $st_timestamp -gt $cur_timestamp ] ; then
+      return 0;
+    fi
+  fi
+  return 1
 }

@@ -16,7 +16,7 @@ cur_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # utilities
 . "$cur_dir/utilities.sh"
 
-log 'Witty Pi 2 daemon (v2.53) is started.'
+log 'Witty Pi 2 daemon (v2.54) is started.'
 
 # halt by GPIO-4 (BCM naming)
 halt_pin=4
@@ -64,7 +64,13 @@ sleep 3
 
 # run schedule script
 if $has_rtc ; then
-  "$cur_dir/runScript.sh" >> "$cur_dir/schedule.log" &
+  if [ -f $schedule_file ] && $(startup_scheduled_in_future) ; then
+    log 'I am awake while the schedule script assumes me to sleep, hush...'
+    startup_time=$(get_local_date_time "$(get_startup_time)" "nowildcard")
+    log "Please turn me off before \"$(date +%Y-%m-)$startup_time\", or you will disturb the running schedule script."
+  else
+    "$cur_dir/runScript.sh" >> "$cur_dir/schedule.log" &
+  fi
 else
   log 'Witty Pi is not connected, skip schedule script...'
 fi
