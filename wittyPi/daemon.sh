@@ -32,7 +32,7 @@ led_pin=17
 sleep 2
 
 # if RTC presents
-has_rtc=is_rtc_connected
+has_rtc=$(is_rtc_connected)
 
 if $has_rtc ; then
   # disable square wave and enable alarms
