@@ -32,9 +32,10 @@ led_pin=17
 sleep 2
 
 # if RTC presents
-has_rtc=$(is_rtc_connected)
+is_rtc_connected
+has_rtc=$?  # should be 0 if RTC presents
 
-if $has_rtc ; then
+if [ $has_rtc == 0 ] ; then
   # disable square wave and enable alarms
   i2c_write 0x01 0x68 0x0E 0x07
 
@@ -53,7 +54,7 @@ else
 fi
 
 # synchronize time
-if $has_rtc ; then
+if [ $has_rtc == 0 ] ; then
   "$cur_dir/syncTime.sh" &
 else
   log 'Witty Pi is not connected, skip synchronizing time...'
@@ -63,8 +64,8 @@ fi
 sleep 3
 
 # run schedule script
-if $has_rtc ; then
-  if [ -f $schedule_file ] && $(startup_scheduled_in_future) ; then
+if [ $has_rtc == 0 ] ; then
+  if [ -f "$cur_dir/schedule.wpi" ] && $(startup_scheduled_in_future) ; then
     log 'I am awake while the schedule script assumes me to sleep, hush...'
     startup_time=$(get_local_date_time "$(get_startup_time)" "nowildcard")
     log "Please turn me off before \"$(date +%Y-%m-)$startup_time\", or you will disturb the running schedule script."
@@ -93,7 +94,7 @@ done
 log 'Pending for incoming shutdown command...'
 while true; do
   gpio -g wfi $halt_pin falling
-  if $has_rtc ; then
+  if [ $has_rtc == 0 ] ; then
     byte_F=$(i2c_read 0x01 0x68 0x0F)
     if [ $((($byte_F&0x1) != 0)) == '1' ] && [ $((($byte_F&0x2) == 0)) == '1' ] ; then
       # alarm A (startup) occurs, clear flags and ignore
