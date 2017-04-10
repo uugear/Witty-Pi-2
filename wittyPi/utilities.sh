@@ -458,6 +458,7 @@ do_shutdown()
 {
   local halt_pin=$1
   local led_pin=$2
+  local has_rtc=$3
 
   # light the white LED
   gpio -g mode $led_pin out
@@ -467,7 +468,7 @@ do_shutdown()
   gpio -g mode $halt_pin in
   gpio -g mode $halt_pin up
 
-  if $has_rtc ; then
+  if [ $has_rtc == 0 ] ; then
     # clear alarm flags
     clear_alarm_flags
 
@@ -481,15 +482,18 @@ do_shutdown()
   shutdown -h now
 }
 
-startup_scheduled_in_future()
+schedule_script_interrupted()
 {
   local startup_time=$(get_local_date_time "$(get_startup_time)" "nowildcard")
   local st_size=${#startup_time}
-  if [ $st_size != '3' ] ; then
+  local shutdown_time=$(get_local_date_time "$(get_shutdown_time)" "nowildcard")
+  local sd_size=${#shutdown_time}
+  if [ $st_size != '3' ] && [ $sd_size != '3' ] ; then
     local st_timestamp=$(date --date="$(date +%Y-%m-)$startup_time" +%s)
+    local sd_timestamp=$(date --date="$(date +%Y-%m-)$shutdown_time" +%s)
     local cur_timestamp=$(date +%s)
-    if [ $st_timestamp -gt $cur_timestamp ] ; then
-      return 0;
+    if [ $st_timestamp -gt $cur_timestamp ] && [ $sd_timestamp -lt $cur_timestamp ] ; then
+      return 0
     fi
   fi
   return 1

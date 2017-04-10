@@ -125,6 +125,11 @@ if [ -f $schedule_file ]; then
     if [ $((cur_time >= end)) == '1' ] ; then
       log 'The schedule script has ended already.'
     else
+      schedule_script_interrupted
+      interrupted=$?	# should be 0 if scheduled startup is in the future and shutdown is in the pass
+      if [ ! -z "$2" ] && [ $interrupted == 0 ] ; then
+        log 'Schedule script is interrupted, revising the schedule...'
+      fi
       index=0
       found_states=0
       check_time=$begin
@@ -148,13 +153,25 @@ if [ -f $schedule_file ]; then
             if [[ ${states[$index]} == *WAIT ]]; then
               log 'Skip scheduling next shutdown, which should be done externally.'
             else
-              setup_on_state $check_time
+              if [ ! -z "$2" ] && [ $interrupted == 0 ] ; then
+                # schedule a shutdown 1 minute before next startup
+                setup_on_state $((check_time-duration-60))
+              else
+                setup_on_state $check_time
+              fi
             fi
           elif [[ ${states[$index]} == OFF* ]] ; then
             if [[ ${states[$index]} == *WAIT ]]; then
               log 'Skip scheduling next startup, which should be done externally.'
             else
-              setup_off_state $check_time
+              if [ ! -z "$2" ] && [ $interrupted == 0 ] && [ $index != 0 ] ; then
+                # jump back to previous OFF state 
+                prev_state=${states[$((index-1))]}
+                prev_duration=$(extract_duration $prev_state)
+                setup_off_state $((check_time-duration-prev_duration))
+              else
+                setup_off_state $check_time
+              fi
             fi
           else
             log "I can not recognize this state: ${states[$index]}"

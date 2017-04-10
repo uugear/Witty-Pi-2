@@ -16,7 +16,7 @@ cur_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # utilities
 . "$cur_dir/utilities.sh"
 
-log 'Witty Pi 2 daemon (v2.54) is started.'
+log 'Witty Pi 2 daemon (v2.55) is started.'
 
 # halt by GPIO-4 (BCM naming)
 halt_pin=4
@@ -44,7 +44,7 @@ if [ $has_rtc == 0 ] ; then
   # if woke up by alarm B (shutdown), turn it off immediately
   if [ $((($byte_F&0x1) == 0)) == '1' ] && [ $((($byte_F&0x2) != 0)) == '1' ] ; then
     log 'Seems I was unexpectedly woken up by shutdown alarm, must go back to sleep...'
-    do_shutdown $halt_pin $led_pin
+    do_shutdown $halt_pin $led_pin $has_rtc
   fi
 
   # clear alarm flags
@@ -65,13 +65,7 @@ sleep 3
 
 # run schedule script
 if [ $has_rtc == 0 ] ; then
-  if [ -f "$cur_dir/schedule.wpi" ] && $(startup_scheduled_in_future) ; then
-    log 'I am awake while the schedule script assumes me to sleep, hush...'
-    startup_time=$(get_local_date_time "$(get_startup_time)" "nowildcard")
-    log "Please turn me off before \"$(date +%Y-%m-)$startup_time\", or you will disturb the running schedule script."
-  else
-    "$cur_dir/runScript.sh" >> "$cur_dir/schedule.log" &
-  fi
+  "$cur_dir/runScript.sh" 0 revise >> "$cur_dir/schedule.log" &
 else
   log 'Witty Pi is not connected, skip schedule script...'
 fi
@@ -110,4 +104,4 @@ while true; do
 done
 log 'Shutdown command is received...'
 
-do_shutdown $halt_pin $led_pin
+do_shutdown $halt_pin $led_pin $has_rtc
