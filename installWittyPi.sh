@@ -71,12 +71,12 @@ else
   apt-get install -y i2c-tools || ((ERR++))
 fi
 
-# check if it is Jessie
+# check if it is Jessie or Stretch
 osInfo=$(cat /etc/os-release)
-if [[ $osInfo == *"jessie"* ]] ; then
-  isJessie=true
+if [[ $osInfo == *"jessie"* || $osInfo == *"stretch"* ]] ; then
+  isJessieOrStretch=true
 else
-  isJessie=false
+  isJessieOrStretch=false
 fi
 
 # install wiringPi
@@ -85,7 +85,7 @@ if [ $ERR -eq 0 ]; then
   if hash gpio 2>/dev/null; then
     echo 'Seems wiringPi is installed already, skip this step.'
   else
-    if $isJessie ; then
+    if $isJessieOrStretch ; then
       apt-get install -y wiringpi || ((ERR++))
     else
       if hash git 2>/dev/null; then
@@ -129,7 +129,7 @@ if [ $ERR -eq 0 ]; then
 fi
 
 # install Qt 5 (optional and for Jessie only)
-if $isJessie ; then
+if $isJessieOrStretch ; then
   read -p "Do you want to install Qt 5 for GUI running? [y/n] " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]] ; then
@@ -138,7 +138,7 @@ if $isJessie ; then
     echo 'Skip Qt 5 installation.'
   fi
 else
-  echo 'For non-Jessie OS, please install Qt 5 manually to run the GUI.'
+  echo 'The OS is not Jessie or Stretch, please install Qt 5 manually to run the GUI.'
 fi
 
 echo
