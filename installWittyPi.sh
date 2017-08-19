@@ -20,7 +20,7 @@ ERR=0
 
 echo '================================================================================'
 echo '|                                                                              |'
-echo '|                   Witty Pi 2 Software Installing Script                      |'
+echo '|                   Witty Pi Software Installation Script                      |'
 echo '|                                                                              |'
 echo '================================================================================'
 
@@ -126,6 +126,23 @@ if [ $ERR -eq 0 ]; then
     sleep 2
     rm wittyPi.zip
   fi
+fi
+
+# remove fake-hwclock and disable ntpd to improve reliability  
+read -p "Remove fake-hwclock package and disable ntpd daemon? (recommended) [y/n] " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]] ; then
+	update-rc.d fake-hwclock remove || ((ERR++))
+  apt-get remove -y fake-hwclock || ((ERR++))
+  if [ -f /etc/cron.hourly/fake-hwclock ]; then
+    rm /etc/cron.hourly/fake-hwclock || ((ERR++))
+  fi
+  if [ -f /etc/init.d/fake-hwclock ]; then
+    rm /etc/init.d/fake-hwclock || ((ERR++))
+  fi
+  update-rc.d -f ntp remove || ((ERR++))
+else
+  echo 'Skip fake-hwclock removal and ntpd disabling.'
 fi
 
 # install Qt 5 (optional and for Jessie only)
