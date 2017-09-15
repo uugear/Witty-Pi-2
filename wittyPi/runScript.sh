@@ -24,7 +24,7 @@ schedule_file="$cur_dir/schedule.wpi"
 . "$cur_dir/utilities.sh"
 
 # pending until system time gets initialized
-while [[ "$(date +%Y)" == *"1970"* ]]; do
+while [[ "$(date +%Y)" == *"1969"* ]] || [[ "$(date +%Y)" == *"1970"* ]]; do
   sleep 1
 done
 

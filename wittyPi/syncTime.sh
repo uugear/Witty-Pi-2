@@ -49,7 +49,7 @@ else
   if [[ $rtctime == *"1999"* ]] || [[ $rtctime == *"2000"* ]]; then
     # if you never set RTC time before
     log 'RTC time has not been set before (stays in year 1999/2000).'
-    if [[ $sysyear != *"1970"* ]]; then
+    if [[ $sysyear != *"1969"* ]] && [[ $sysyear != *"1970"* ]]; then
       # your Raspberry Pi has a decent time
       system_to_rtc
     else

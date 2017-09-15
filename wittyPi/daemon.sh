@@ -16,7 +16,7 @@ cur_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # utilities
 . "$cur_dir/utilities.sh"
 
-log 'Witty Pi 2 daemon (v2.55) is started.'
+log 'Witty Pi daemon (v2.56) is started.'
 
 # halt by GPIO-4 (BCM naming)
 halt_pin=4
