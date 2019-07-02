@@ -1,5 +1,5 @@
 # Witty-Pi-2
-Witty Pi 2 is the new generation of Witty Pi, which adds RTC and power management to your Raspberry Pi, and can define complex ON/OFF sequence with simple script.
+Witty Pi 2 is the second generation of Witty Pi, which adds RTC and power management to your Raspberry Pi, and can define complex ON/OFF sequence with simple script.
 
 After installing the software on your Raspberry Pi, you can enjoy these amazing new features:
 * Single tap on the button to gracefully turn on/off Raspberry Pi.
