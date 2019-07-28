@@ -4,6 +4,32 @@
 # This script provides some useful utility functions
 #
 
+# halt by GPIO-4 (BCM naming)
+HALT_PIN=4
+
+# LED on GPIO-17 (BCM naming)
+LED_PIN=17
+
+
+one_wire_confliction()
+{
+	if [[ $HALT_PIN -eq 4 ]]; then
+		if grep -qe "^\s*dtoverlay=w1-gpio\s*$" /boot/config.txt; then
+	  	return 0
+		fi
+		if grep -qe "^\s*dtoverlay=w1-gpio-pullup\s*$" /boot/config.txt; then
+	  	return 0
+		fi
+	fi 
+  if grep -qe "^\s*dtoverlay=w1-gpio,gpiopin=$HALT_PIN\s*$" /boot/config.txt; then
+  	return 0
+	fi
+	if grep -qe "^\s*dtoverlay=w1-gpio-pullup,gpiopin=$HALT_PIN\s*$" /boot/config.txt; then
+  	return 0
+	fi
+	return 1
+}
+
 has_internet()
 {
   nc -z -w 5 8.8.8.8 53  >/dev/null 2>&1

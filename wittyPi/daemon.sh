@@ -16,17 +16,27 @@ cur_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # utilities
 . "$cur_dir/utilities.sh"
 
-log 'Witty Pi daemon (v2.56) is started.'
+log 'Witty Pi daemon (v2.66) is started.'
 
-# halt by GPIO-4 (BCM naming)
-halt_pin=4
+# log Raspberry Pi model
+pi_model=$(cat /proc/device-tree/model)
+log "Running on $pi_model"
+
+# log wiringPi version number
+wp_ver=$(gpio -v | sed -n '1 s/.*\([0-9]\+\.[0-9]\+\).*/\1/p')
+log "Wiring Pi version: $wp_ver"
+
+# check 1-wire confliction
+if one_wire_confliction ; then
+	log "Confliction: 1-Wire interface is enabled on GPIO-$HALT_PIN, which is also used by Witty Pi."
+	log 'Witty Pi daemon can not work until you solve this confliction and reboot Raspberry Pi.'
+	exit
+fi
 
 # make sure the halt pin is input with internal pull up
-gpio -g mode $halt_pin up
-gpio -g mode $halt_pin in
+gpio -g mode $HALT_PIN up
+gpio -g mode $HALT_PIN in
 
-# LED on GPIO-17 (BCM naming)
-led_pin=17
 
 # wait for RTC ready
 sleep 2
@@ -44,7 +54,7 @@ if [ $has_rtc == 0 ] ; then
   # if woke up by alarm B (shutdown), turn it off immediately
   if [ $((($byte_F&0x1) == 0)) == '1' ] && [ $((($byte_F&0x2) != 0)) == '1' ] ; then
     log 'Seems I was unexpectedly woken up by shutdown alarm, must go back to sleep...'
-    do_shutdown $halt_pin $led_pin $has_rtc
+    do_shutdown $HALT_PIN $LED_PIN $has_rtc
   fi
 
   # clear alarm flags
@@ -73,7 +83,7 @@ fi
 # delay until GPIO pin state gets stable
 counter=0
 while [ $counter -lt 5 ]; do  # increase this value if it needs more time
-  if [ $(gpio -g read $halt_pin) == '1' ] ; then
+  if [ $(gpio -g read $HALT_PIN) == '1' ] ; then
     counter=$(($counter+1))
   else
     counter=0
@@ -87,7 +97,7 @@ done
 # wait for GPIO-4 (BCM naming) falling, or alarm B (shutdown)
 log 'Pending for incoming shutdown command...'
 while true; do
-  gpio -g wfi $halt_pin falling
+  gpio -g wfi $HALT_PIN falling
   if [ $has_rtc == 0 ] ; then
     byte_F=$(i2c_read 0x01 0x68 0x0F)
     if [ $((($byte_F&0x1) != 0)) == '1' ] && [ $((($byte_F&0x2) == 0)) == '1' ] ; then
@@ -104,4 +114,4 @@ while true; do
 done
 log 'Shutdown command is received...'
 
-do_shutdown $halt_pin $led_pin $has_rtc
+do_shutdown $HALT_PIN $LED_PIN $has_rtc
